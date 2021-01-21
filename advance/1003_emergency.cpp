@@ -2,6 +2,7 @@
 #include <vector>
 #include <math.h>
 #include <queue>
+#include <set>
 using namespace std;
 
 typedef pair<int, int> Edge;//pair<vex, weight>
@@ -20,6 +21,7 @@ public:
     int* distTo;
     vector<int>* pre_city;
     bool* hasVisited;
+    set<int> path_cities;
     int visited_city_num = 0;
 public:
     CityInfo()
@@ -67,6 +69,7 @@ public:
 
         // cout << "distTo " << c2 << " is " << distTo[c2] << endl;
         shortest_num =  getShortPathNum(c2);
+        getMaxRescueTeams();
         // cout << "short " << shortest_num << endl;
     }
 
@@ -74,15 +77,20 @@ private:
 
     void relax(int v)
     {
+        cout << "relaxing vex " << v << endl;
         for (int i = 0; i < city_num; i++)
         { 
             if (road[v][i] == 0)//not road here
                 continue;
             if (distTo[i] >= distTo[v] + road[v][i])
             {
+                if (distTo[i] > distTo[v] + road[v][i]) {
+                    pre_city[i].clear();
+                }
                 distTo[i] = distTo[v] + road[v][i];
+                
                 pre_city[i].push_back(v);
-                // cout << "relaxing vex:" << v <<", " << "to: " << i << endl; //debug
+                cout << "relaxing vex:" << v <<", " << "to: " << i << endl; //debug
             }
         }
         hasVisited[v] = true;
@@ -108,6 +116,7 @@ private:
 
     int getShortPathNum(int v)
     {
+        path_cities.insert(v);
         if (v == c1)
             return 1;
         int n = 0;
@@ -116,6 +125,13 @@ private:
             n += getShortPathNum(pre_vex);
         }
         return n;
+    }
+
+    void getMaxRescueTeams() {
+        for (int v : path_cities) {
+            max_rescue += rescue_team[v];
+            // cout << v << " ";
+        }
     }
 };
 
