@@ -69,7 +69,7 @@ public:
 
         // cout << "distTo " << c2 << " is " << distTo[c2] << endl;
         shortest_num =  getShortPathNum(c2);
-        getMaxRescueTeams();
+        max_rescue = getMaxRescueTeams(c2);
         // cout << "short " << shortest_num << endl;
     }
 
@@ -77,7 +77,7 @@ private:
 
     void relax(int v)
     {
-        cout << "relaxing vex " << v << endl;
+        // cout << "relaxing vex " << v << endl;
         for (int i = 0; i < city_num; i++)
         { 
             if (road[v][i] == 0)//not road here
@@ -90,7 +90,7 @@ private:
                 distTo[i] = distTo[v] + road[v][i];
                 
                 pre_city[i].push_back(v);
-                cout << "relaxing vex:" << v <<", " << "to: " << i << endl; //debug
+                // cout << "relaxing vex:" << v <<", " << "to: " << i << endl; //debug
             }
         }
         hasVisited[v] = true;
@@ -120,18 +120,27 @@ private:
         if (v == c1)
             return 1;
         int n = 0;
-        int flag = -1;
         for (int pre_vex : pre_city[v]) {
             n += getShortPathNum(pre_vex);
         }
         return n;
     }
 
-    void getMaxRescueTeams() {
-        for (int v : path_cities) {
-            max_rescue += rescue_team[v];
-            // cout << v << " ";
+    int getMaxRescueTeams(int v) {
+        // for (int v : path_cities) {
+        //     max_rescue += rescue_team[v];
+        //     // cout << v << " ";
+        // }
+        if (v == c1)
+            return rescue_team[c1];
+        int prev_max = 0;
+        int tmp;
+        for (int pre_vex : pre_city[v]) {
+            tmp = getMaxRescueTeams(pre_vex);
+            // cout << "prev vex: " << pre_vex << "max: " << tmp << endl;
+            prev_max = prev_max < tmp ? tmp : prev_max;
         }
+        return prev_max + rescue_team[v];
     }
 };
 
