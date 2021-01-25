@@ -1,5 +1,7 @@
 #include <iostream>
+#include <queue>
 using namespace std;
+
 
 int main(int argc, char const *argv[])
 {
@@ -18,7 +20,7 @@ int main(int argc, char const *argv[])
     }
 
     int sum = 0;
-    for (int i = win_left; win_left <= win_right; i++) {
+    for (int i = win_left; i <= win_right; i++) {
         sum += data[i];
     }
 
