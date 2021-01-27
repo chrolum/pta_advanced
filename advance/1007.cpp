@@ -1,58 +1,49 @@
 #include <iostream>
-#include <queue>
 using namespace std;
 
-int getSum(const int a[], int begin_idx, int end_idx) {
-    int sum = 0;
-    for (int i = begin_idx; i <= end_idx; i++) {
-        sum += a[i];
-    }
-    return sum;
-}
 
 int main(int argc, char const *argv[])
 {
     int n;
     cin >> n;
     int* data = new int[n];
-
+    bool areAllNagetive = true;
     for (int i = 0; i < n; i++) {
         cin >> data[i];
-    }
-
-    int win_left = 0, win_right = 0;
-
-    int win_size = 0, max_sum = 0;
-    bool areAllNagetive = true;
-    while (win_size <= n-1) {
-        int begin_idx = 0, tmp_sum;
-        while (begin_idx + win_size < n) {
-            if (data[begin_idx] >= 0)
-                areAllNagetive = false;
-            tmp_sum = getSum(data, begin_idx, begin_idx + win_size);
-            if (tmp_sum > max_sum) {
-                max_sum = tmp_sum;
-                win_left = begin_idx;
-                win_right = win_left + win_size;
-            }
-
-            if (tmp_sum == max_sum && begin_idx < win_left) {
-                win_left = begin_idx;
-                win_right = win_left + win_size;
-            }
-            begin_idx++;
-        }
-        win_size++;
+        if (data[i] >= 0)
+            areAllNagetive = false;
     }
 
     if (areAllNagetive) {
-        max_sum = 0;
-        win_left = 0;
-        win_right = n-1;
+        cout << 0 << " " << data[0] << " " << data[n-1];
+        return 0;
+    }
+
+    int* dp_sum = new int[n];
+    int* begin_idxs = new int[n];
+    int end_idx = 0, max_sum = data[0];
+
+    dp_sum[0] = data[0];
+    begin_idxs[0] = 0;
+
+    for (int i = 1; i < n; i++) {
+        if (dp_sum[i-1] + data[i] < data[i]) {
+            dp_sum[i] = data[i];
+            begin_idxs[i] = i;
+        }
+        else {
+            dp_sum[i] = dp_sum[i-1] + data[i];
+            begin_idxs[i] = begin_idxs[i-1];
+        }
+
+        if (max_sum < dp_sum[i]) {
+            max_sum = dp_sum[i];
+            end_idx = i;
+        }
     }
 
     cout << max_sum;
-    cout << " " << data[win_left] << " " << data[win_right];
+    cout << " " << data[begin_idxs[end_idx]] << " " << data[end_idx];
 
     return 0;
 }
