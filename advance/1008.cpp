@@ -8,7 +8,7 @@ using namespace std;
 int getRunningTime(int currFloor, int targetFloor) {
 
     bool isUp = currFloor < targetFloor ? true : false;
-    int stopTime, movingTime, floor_num;
+    int movingTime, floor_num;
     if (isUp) {
         floor_num = targetFloor - currFloor;
         movingTime = floor_num * UP_TIME;
