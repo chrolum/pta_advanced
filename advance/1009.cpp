@@ -64,12 +64,14 @@ int main(int argc, char const *argv[])
 
             //normalize the tmp coff
             while (!isNormal(normal_c)) {
-                normal_c = normal_c / 10;
+                double normal_part = normal_c - (int)(normal_c / 10) * 10;
+                normal_c = (int)(normal_c / 10);
+                add_normalize(tmp_e, normal_part, res);
                 carry++;
             }
             tmp_e += carry;
             
-            add_normalize(tmp_e, tmp_c, res);
+            add_normalize(tmp_e, normal_c, res);
         }
     }
 
