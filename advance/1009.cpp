@@ -12,33 +12,6 @@ void read_ploy(int n, map<int, double>& ploy) {
     }
 }
 
-bool isNormal(double a) {
-    return (a < 10) && (a > -10);
-}
-
-void add_normalize(int e, double c, map<int, double>& ploy) {
-    if (ploy.count(e) == 0) {
-        ploy[e] = c;
-    }
-    else { // will be continous carry in
-        bool hasCarried = true;
-        while (hasCarried) {
-            c += ploy[e];
-            if (!isNormal(c)) { // has carry
-                hasCarried = true;
-                c = c / 10;
-                ploy[e] = c;
-                c = 1; //carry one
-                e++;
-            }
-            else {
-                hasCarried = false;
-                ploy[e] = c;
-            }    
-        }
-    }
-}
-
 
 int main(int argc, char const *argv[])
 {
@@ -54,24 +27,18 @@ int main(int argc, char const *argv[])
 
     //product
     int tmp_e;
-    double tmp_c, normal_c, carry;
+    double tmp_c;
     for (auto item1 : ploy1) {
         for (auto item2 : ploy2) {
             tmp_e = item1.first + item2.first;
             tmp_c = item1.second * item2.second;
-            normal_c = tmp_c;
-            carry = 0;
 
-            //normalize the tmp coff
-            while (!isNormal(normal_c)) {
-                double normal_part = normal_c - (int)(normal_c / 10) * 10;
-                normal_c = (int)(normal_c / 10);
-                add_normalize(tmp_e, normal_part, res);
-                carry++;
+            if (res.count(tmp_e) == 0) {
+                res[tmp_e] = tmp_c;
             }
-            tmp_e += carry;
-            
-            add_normalize(tmp_e, normal_c, res);
+            else {
+                res[tmp_e] += tmp_c;
+            }
         }
     }
 
@@ -79,9 +46,13 @@ int main(int argc, char const *argv[])
     cout << res.size();
 
     for (auto item = res.rbegin(); item != res.rend(); item++) {
+        if (item->second < 0.1 && item->second > - 0.1) {
+            continue;
+        }
         cout << " " << item->first;
         printf(" %.1f", item->second);
+
     }
     return 0;
-}
+}   
 
