@@ -5,7 +5,6 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
     /* code */
-    float info[3][3];
     int buy_records[3] = {0,0,0};
     char buy_record_output[3] = {'W', 'T', 'L'};
 
