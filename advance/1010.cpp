@@ -2,8 +2,9 @@
 #include <string>
 using namespace std;
 
-// 
-unsigned long long convert_to_decimal(string num, int radix)
+typedef unsigned long long ull;
+
+ull convert_to_decimal(string num, int radix)
 {
     unsigned long long base = 1;
     unsigned long long res = 0;
@@ -17,64 +18,75 @@ unsigned long long convert_to_decimal(string num, int radix)
     return res;
 }
 
+// return a smallest radix, if search failed return 0
+ull binary_search_radix(ull target_num, string convert_s, ull lo, ull hi)
+{
+    ull mid, curr_num;
+    ull res = 0;
+    while (lo <= hi)//[lo, hi] while lo == hi, still need to search once
+    {
+        mid = lo + (hi - lo) / 2;
+        curr_num = convert_to_decimal(convert_s, mid);
+        if (target_num < curr_num)//bigger, find left region
+        {
+            hi = mid - 1;
+            continue;
+        }
+        if (target_num > curr_num)//smaller, find right region
+        {
+            lo = mid + 1;
+            continue;
+        }
+
+        if (target_num == curr_num)
+        {
+            res = mid; // not need to compare, beacuse there will be a smaller radix each loop
+            hi = mid - 1;//find the smaller region
+            continue;
+        }
+    }
+    return res; //0 mean search failed
+}
+
 int main(int argc, char const *argv[])
 {
-    string n1, n2, base_s, test_s;
+    string n1, n2, target_s, test_s;
     int tag, radix;
 
     cin >> n1 >> n2;
     cin >> tag >> radix;    
 
-    base_s = tag == 1 ? n1 : n2;
+    target_s = tag == 1 ? n1 : n2;
     test_s = tag == 1 ? n2 : n1;
 
-    unsigned long long base_num, test_num;
+    ull target_num;
     
-    base_num = convert_to_decimal(base_s, radix);
+    target_num = convert_to_decimal(target_s, radix);
 
-    unsigned long long lo, hi, mid;
+    ull lo, hi;
     lo = 2;
-    const unsigned long long max_radix = 
-        base_num > 36 ? base_num : 36;
+    //confirm the highest radix
+    const ull max_radix = 
+        target_num > 36 ? target_num : 36;
     hi = max_radix;
 
     //confirm the lowest radix
-    int tmp_d;
+    ull tmp_d;
     for (char digit : test_s)
     {
         tmp_d = digit < 'a' ? digit - '0' + 1: digit - 'a' + 11;
         lo = lo < tmp_d ? tmp_d : lo;
     }
-    unsigned long long min_radix = max_radix + 1;
 
-    while (lo <= hi)
-    {
-        mid = (lo + hi) / 2;
-        test_num = convert_to_decimal(test_s, mid);
-        if (test_num > base_num)
-        {
-            hi = mid - 1;
-        }
-        else if (test_num < base_num)
-        {
-            lo = mid + 1;
-        }
-        else //test_num == base_num
-        {
-            min_radix = min_radix > mid ? mid : min_radix;
-            hi = mid - 1;// continue to search smaller radix
-        }
-        // cout << mid << " " << lo << " " << hi << endl;
-    }
+    ull res_radix = binary_search_radix(target_num, test_s, lo, hi);
 
-
-    if (min_radix == max_radix + 1)
+    if (!res_radix)
     {
         cout << "Impossible";
     }
     else
     {
-        cout << min_radix; 
+        cout << res_radix; 
     }
     return 0;
 }
