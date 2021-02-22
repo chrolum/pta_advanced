@@ -32,22 +32,23 @@ int main(int argc, char const *argv[])
     
     base_num = convert_to_decimal(base_s, radix);
 
-    int lo, hi, mid;
-    lo = 1, hi = 36;
+    unsigned long long lo, hi, mid;
+    lo = 2;
+    const unsigned long long max_radix = 
+        base_num > 36 ? base_num : 36;
+    hi = max_radix;
 
     //confirm the lowest radix
     int tmp_d;
     for (char digit : test_s)
     {
-        tmp_d = digit < 'a' ? digit - '0' : digit - 'a' + 10;
+        tmp_d = digit < 'a' ? digit - '0' + 1: digit - 'a' + 11;
         lo = lo < tmp_d ? tmp_d : lo;
     }
+    unsigned long long min_radix = max_radix + 1;
 
-    int min_radix = 37;
-    bool firstLoop = true;
-    while (lo < hi || firstLoop)
+    while (lo <= hi)
     {
-        firstLoop = false;
         mid = (lo + hi) / 2;
         test_num = convert_to_decimal(test_s, mid);
         if (test_num > base_num)
@@ -67,7 +68,7 @@ int main(int argc, char const *argv[])
     }
 
 
-    if (min_radix == 37)
+    if (min_radix == max_radix + 1)
     {
         cout << "Impossible";
     }
