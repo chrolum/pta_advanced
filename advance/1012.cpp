@@ -1,5 +1,5 @@
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #define MAX_NUM 2000
 using namespace std;
 //NOTE: rank start from 0
@@ -17,7 +17,7 @@ struct Student
     int rank_a;
 };
 
-map<int, Student*> student_record;
+unordered_map<int, Student> student_record;
 
 //bubblesort
 void add_bubble_to_end(Student* rank_list[], int end_idx, Student *s1, CourseType c_t)
@@ -96,14 +96,14 @@ int main(int argc, char const *argv[])
 
     //update rank list
     int student_id;
+    char output_str[] = {'C', 'M', 'E', 'A'};
     for(int i = 0; i < record_num; i++)
     {
         cin >> student_id;
         Student* s = new Student();
         cin >> s->C >> s->M >> s->E;
         s->A = (s->C + s->E + s->M) / 3;
-
-        student_record[student_id] = s;
+        student_record[student_id] = *s;
         add_bubble_to_end(rank_c, i, s, CourseType::C);
         add_bubble_to_end(rank_m, i, s, CourseType::M);
         add_bubble_to_end(rank_e, i, s, CourseType::E);
@@ -111,6 +111,7 @@ int main(int argc, char const *argv[])
     }
     
     //query
+    Student output_s;
     for (int j = 0; j < query_num; j++)
     {
         cin >> student_id;
@@ -121,8 +122,29 @@ int main(int argc, char const *argv[])
             continue;
         }
 
+        output_s = student_record[student_id];
+        CourseType output_c = CourseType::A;
+        // A > C > M > E
+        int tmp_rank = output_s.rank_a;
+        if (tmp_rank > output_s.rank_c)
+        {
+            output_c = CourseType::C;
+            tmp_rank = output_s.rank_c;
+        }
+
+        if (tmp_rank > output_s.rank_m)
+        {
+            output_c = CourseType::M;
+            tmp_rank = output_s.rank_m;
+        }
         
-        
+        if (tmp_rank > output_s.rank_e)
+        {
+            output_c = CourseType::E;
+            tmp_rank = output_s.rank_e;
+        }
+
+        cout << tmp_rank + 1 << " " << output_str[int(output_c)] << endl;
     }
     return 0;
 }
