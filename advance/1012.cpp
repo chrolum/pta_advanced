@@ -1,86 +1,68 @@
 #include <iostream>
 #include <unordered_map>
 #define MAX_NUM 2000
+#define C 0
+#define M 1
+#define E 2
+#define A 3
 using namespace std;
-//NOTE: rank start from 0
-enum class CourseType {C, M, E, A};
 
 struct Student
 {
-    int C;
-    int M;
-    int E;
-    int A;
-    int rank_c;
-    int rank_m;
-    int rank_e;
-    int rank_a;
+    int grade[4];
+    int rank[4];
 };
 
 unordered_map<int, Student> student_record;
 
 //bubblesort
-void add_bubble_to_end(Student* rank_list[], int end_idx, Student *s1, CourseType c_t)
+void add_bubble_to_end(Student* rank_list[], int end_idx, Student *s1, int course_type)
 {
     if (end_idx >= MAX_NUM)
         return;
 
-
-    int* p_rank = &(s1->C);
-    int offset_grade = 0;
-
-    switch (c_t)
-    {
-    case CourseType::C:
-        offset_grade = 0;
-        break;
-    case CourseType::M:
-        offset_grade = 1*sizeof(int);
-        break;
-    case CourseType::E:
-        offset_grade = 2*sizeof(int);
-        break;
-    case CourseType::A:
-        offset_grade = 3*sizeof(int);
-        break;
-    default:
-        break;
-    }
-
-    int curr_grade = *(p_rank + offset_grade);
-    p_rank += offset_grade + 4*sizeof(int);
-
-    *p_rank = end_idx; //init rank to the end of array
-    rank_list[end_idx] = s1;//add element
-
-    if (end_idx == 0)
-        return;
-
-    
-    //buddle sort
+    //inital student rank and update rank list
+    s1->rank[course_type] = end_idx;
+    rank_list[end_idx] = s1;
     int curr_idx = end_idx;
-    int *p_pre_rank, *p_pre_grade;
-    Student* p_pre_s;
+
+    if (curr_idx == 0)
+        return; //not need to bubble up
+
+    //bubble sort
+
+    int pre_grade;
+    const int curr_grade = s1->grade[course_type];
+    int last_grade = curr_grade;
+    int same_cnt = 0;
     while (curr_idx >= 1)
     {
-        p_pre_s = rank_list[curr_idx-1];
-        p_pre_grade = &(p_pre_s->C) + offset_grade;
-        p_pre_rank = p_pre_grade + 4*sizeof(int);
-
-        if (curr_grade >= *p_pre_grade)
-            return;
-
-        if (curr_grade < *p_pre_grade)
+        pre_grade = rank_list[curr_idx-1]->grade[course_type];
+        
+        if (curr_grade < pre_grade) //swap two student and update their rank
         {
-            //swap two student position
-            rank_list[curr_idx] = p_pre_s;
-            rank_list[curr_idx-1] = s1;
-            //update rank
-            (*p_pre_rank)++;
-            (*p_rank) = curr_idx-1;
+            //update the older record
+            rank_list[curr_idx] = rank_list[curr_idx-1];
+            rank_list[curr_idx]->rank[course_type] = curr_idx;
+
+            //update the new student record
+            --curr_idx;
+            rank_list[curr_idx] = s1;
+            s1->rank[course_type] = curr_idx;
+            continue;
         }
-        curr_idx--;
+
+        if (curr_grade == pre_grade)
+        {
+            s1->rank[course_type] = rank_list[curr_idx-1]->rank[course_type];
+            return; //just copy the front student rank
+        }
+
+        if (curr_grade > pre_grade)
+            return; // the rank infomation has been initaled
     }
+
+    
 
 }
 
@@ -101,13 +83,13 @@ int main(int argc, char const *argv[])
     {
         cin >> student_id;
         Student* s = new Student();
-        cin >> s->C >> s->M >> s->E;
-        s->A = (s->C + s->E + s->M) / 3;
+        cin >> s->grade[C] >> s->grade[M] >> s->grade[E];
+        s->grade[A] = (s->grade[C] + s->grade[M] + s->grade[E]) / 3;
         student_record[student_id] = *s;
-        add_bubble_to_end(rank_c, i, s, CourseType::C);
-        add_bubble_to_end(rank_m, i, s, CourseType::M);
-        add_bubble_to_end(rank_e, i, s, CourseType::E);
-        add_bubble_to_end(rank_a, i, s, CourseType::A);
+        add_bubble_to_end(rank_c, i, s, C);
+        add_bubble_to_end(rank_m, i, s, M);
+        add_bubble_to_end(rank_e, i, s, E);
+        add_bubble_to_end(rank_a, i, s, A);
     }
     
     //query
@@ -123,28 +105,12 @@ int main(int argc, char const *argv[])
         }
 
         output_s = student_record[student_id];
-        CourseType output_c = CourseType::A;
         // A > C > M > E
-        int tmp_rank = output_s.rank_a;
-        if (tmp_rank > output_s.rank_c)
-        {
-            output_c = CourseType::C;
-            tmp_rank = output_s.rank_c;
-        }
 
-        if (tmp_rank > output_s.rank_m)
-        {
-            output_c = CourseType::M;
-            tmp_rank = output_s.rank_m;
-        }
-        
-        if (tmp_rank > output_s.rank_e)
-        {
-            output_c = CourseType::E;
-            tmp_rank = output_s.rank_e;
-        }
 
-        cout << tmp_rank + 1 << " " << output_str[int(output_c)] << endl;
+        // cout << student_id << " " << output_s.rank_a << " " << output_s.A << endl;
+
+        // cout << tmp_rank + 1 << " " << output_str[int(output_c)] << endl;
     }
     return 0;
 }
