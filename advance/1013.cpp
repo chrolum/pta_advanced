@@ -12,7 +12,7 @@ struct City
     /* data */
 };
 
-
+//TO-DO timeout in checkpoint 4
 City map[CITY_MAX_NUM+1];
 bool hasVisted[CITY_MAX_NUM];
 
@@ -26,11 +26,11 @@ void level_travel(int c, int check_city)
     int tmp_c;
     while (!q.empty())
     {
-        tmp_c = q.front();
+        tmp_c = q.front(); 
         hasVisted[tmp_c] = true;
         for (int n : map[tmp_c].neighour)
         {
-            if (hasVisted[n] || tmp_c == check_city) // the check_city has been destroied
+            if (hasVisted[n] || n == check_city) // the check_city has been destroied
                 continue;
             q.push(n);
         }
@@ -39,7 +39,7 @@ void level_travel(int c, int check_city)
 }
 
 int main(int argc, char const *argv[])
-{
+{ 
     // ios::sync_with_stdio(false);
     int city_num, highways_num, check_num;
     cin >> city_num >> highways_num >> check_num;
