@@ -21,10 +21,17 @@ struct Window
 {
 	queue<Customer*> q;
 	int curr_time = 0;
+	int id = 0;
 };
 
 auto cmp = [](Window* q1, Window* q2)
-{return (q1->q.front()->job_time + q1->curr_time) > (q2->q.front()->job_time + q2->curr_time);};
+{
+	if ((q1->q.front()->job_time + q1->curr_time) == (q2->q.front()->job_time + q2->curr_time))
+	{
+		return q1->id > q2->id;
+	}
+	return (q1->q.front()->job_time + q1->curr_time) > (q2->q.front()->job_time + q2->curr_time);
+};
 
 priority_queue<Window*, std::vector<Window*>, decltype(cmp)> next_free_window(cmp);
 vector<Window*> all_windows;
@@ -42,6 +49,10 @@ void print_end_time(int q_idx)
 	int total_time_by_min = end_time_record[q_idx];
 	int hour = total_time_by_min / 60 + BEGIN_HOUR;
 	int min = total_time_by_min % 60;
+
+	//if (total_time_by_min >= (RUNNING_TIME + 59))
+	//	printf("17:59\n");
+
 	printf("%.2d:%.2d\n", hour, min);
 }
 
@@ -53,13 +64,14 @@ int main(int argc, char const* argv[])
 	for (int i = 1; i <= num_win; i++)
 	{
 		all_windows[i-1] = new Window();
+		all_windows[i-1]->id = i;
 	}
 
 	int job_time;
 	// while the waitting area is not full, just pull custumer in window idx order
 	//inital the priority_queue
 	int customer_cnt = 1;
-	for (int win_idx = 1; win_idx <= customer_cnt && win_idx <= num_win; win_idx++, customer_cnt++)
+	for (int win_idx = 1; customer_cnt <= num_customers && win_idx <= num_win; win_idx++, customer_cnt++)
 	{
 		cin >> job_time;
 		Customer* c = new Customer(customer_cnt, job_time);
@@ -87,10 +99,14 @@ int main(int argc, char const* argv[])
 		Window* w = next_free_window.top();
 		// the first customer has finish his jobs
 		int end_time = w->q.front()->job_time + w->curr_time;
+		int curr_time = w->curr_time;
 		int curr_customer_idx = w->q.front()->id;
 
-		if (end_time > RUNNING_TIME)
+		if (curr_time > RUNNING_TIME)
+		{
 			end_time_record[curr_customer_idx] = -1;
+			w->curr_time = RUNNING_TIME;
+		}
 		else
 		{
 			end_time_record[curr_customer_idx] = end_time;
@@ -107,13 +123,16 @@ int main(int argc, char const* argv[])
 	{
 		auto wq = all_windows[i];
 		int curr_time = wq->curr_time;
-		auto q = wq->q;
+		auto& q = wq->q;
 
 		while (!q.empty())
 		{
-			curr_time += q.front()->job_time;
-			if (curr_time == -1 || curr_time > RUNNING_TIME)
+			if (curr_time >= RUNNING_TIME)
 				curr_time = -1;
+
+			if (curr_time != -1)
+				curr_time += q.front()->job_time;
+
 			end_time_record[q.front()->id] = curr_time;
 			q.pop();
 		}
